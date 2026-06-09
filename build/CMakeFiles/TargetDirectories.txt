@@ -1,0 +1,4 @@
+/home/wangziming/Server_z_o/build/CMakeFiles/game_server.dir
+/home/wangziming/Server_z_o/build/CMakeFiles/game_client.dir
+/home/wangziming/Server_z_o/build/CMakeFiles/edit_cache.dir
+/home/wangziming/Server_z_o/build/CMakeFiles/rebuild_cache.dir
