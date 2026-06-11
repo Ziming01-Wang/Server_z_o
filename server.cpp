@@ -1,4 +1,7 @@
 #include "server.h"
+#include "epoll.h"
+#include "inetaddress.h"
+#include "socket.h"
 #include "util.h"
 #include <cerrno>
 #include <cstdio>
@@ -9,6 +12,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <vector>
 
 #define MAX_EVENTS 1024
 
@@ -18,7 +22,7 @@ void setnonblocking(int fd){
 }
 
 Server::Server(){
-    int sockfd=socket(AF_INET,SOCK_STREAM,0);
+    /*int sockfd=socket(AF_INET,SOCK_STREAM,0);
 
     struct sockaddr_in serv_addr;
     bzero(&serv_addr,sizeof(serv_addr));//initialize
@@ -29,47 +33,29 @@ Server::Server(){
     errif(bind(sockfd,(sockaddr*)&serv_addr,sizeof(serv_addr))==-1,"bind faliure");
     errif(listen(sockfd,SOMAXCONN)==-1,"listen faliure");
 
+    setnonblocking(sockfd);*/
 
-    /*  struct sockaddr_in clin_addr;
-        bzero(&clin_addr, sizeof(clin_addr));
-        socklen_t clin_length=sizeof(clin_addr);
-        int clin_sockfd=accept(sockfd, (sockaddr*)&clin_addr, &clin_length);//客户端套接字
-        std::cout<<"qwertyuiopasdfghjkl;zxcvbnm,"<<std::endl;*/  
+    Socket server_socket;
+    Inetaddress server_addr("127.0.0.1",8888);
+    server_socket.bind(server_addr);
+    server_socket.listen();
+    server_socket.setnonblocking();
 
-    /*while(true){
-        char buf[1024];//buffer
-        bzero(&buf,sizeof(buf));
-        ssize_t readbyte=read(clin_sockfd,&buf,sizeof(buf));
-
-        if(readbyte>0){
-            std::cout<<buf<<std::endl;
-            write(clin_sockfd, &buf, sizeof(buf));
-        }else if(readbyte==0){
-            std::cout<<"safe close"<<std::endl;
-            close(clin_sockfd);
-            break;
-        }else if(readbyte==-1){
-            close(clin_sockfd);
-            errif(true, "read error");
-            break;
-        }
-
-    }
-    close(clin_sockfd);
-    */
-    setnonblocking(sockfd);
-    int epfd=epoll_create1(0);
+    /*int epfd=epoll_create1(0);
     struct epoll_event ep_events[MAX_EVENTS];
     struct epoll_event epev;//只初始化一次，以后新客户端连接可以复用
     epev.events=EPOLLIN;
     epev.data.fd=sockfd;
-    epoll_ctl(epfd, EPOLL_CTL_ADD, sockfd, &epev);//添加服务端监听套接字
+    epoll_ctl(epfd, EPOLL_CTL_ADD, sockfd, &epev);//添加服务端监听套接字*/
+    Epoll m_ep;
+    m_ep.addfd(server_socket.getfd());
 
     while(1){
-        int nfds=epoll_wait(epfd, ep_events, MAX_EVENTS, -1);
-        for(int i=0;i<nfds;i++){
-            if(ep_events[i].data.fd==sockfd){
-                struct sockaddr_in cl_addr;
+        //int nfds=epoll_wait(epfd, ep_events, MAX_EVENTS, -1);
+        std::vector<epoll_event> onevents=m_ep.poll();
+        for(auto it:onevents){
+            if(it.data.fd==server_socket.getfd()){
+                /*struct sockaddr_in cl_addr;
                 bzero(&cl_addr, sizeof(cl_addr));
                 socklen_t cl_addr_len=sizeof(cl_addr);
                 int cl_sockfd=accept(sockfd,(sockaddr*)&cl_addr, &cl_addr_len);
@@ -80,7 +66,11 @@ Server::Server(){
                 bzero(&epev, sizeof(epev));
                 epev.data.fd=cl_sockfd;
                 epev.events=EPOLLIN;
-                epoll_ctl(epfd, EPOLL_CTL_ADD, cl_sockfd, &epev);
+                epoll_ctl(epfd, EPOLL_CTL_ADD, cl_sockfd, &epev);*/
+                int clfd=server_socket.accept();
+                std::cout<<"a new client has connected"<<std::endl;
+                m_ep.addfd(clfd);
+
 
             }else if(ep_events[i].events&EPOLLIN){
                 char buf[1024];
