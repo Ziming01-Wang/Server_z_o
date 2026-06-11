@@ -16,7 +16,10 @@ Client::Client(){
         bzero(&buf,sizeof(buf));
 
         //std::cin>>buf;
-        std::cin.getline(buf, sizeof(buf));
+        if(!std::cin.getline(buf, sizeof(buf))){//输入结束(EOF/Ctrl+D)，退出循环，避免空数据死循环
+            std::cout<<"input closed, bye"<<std::endl;
+            break;
+        }
         int isw=write(clinfd, &buf, sizeof(buf));
         if(isw==-1){
             printf("socket already disconnected, can't write any more!\n");
