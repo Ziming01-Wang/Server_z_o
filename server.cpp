@@ -8,8 +8,15 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 #define MAX_EVENTS 1024
+
+
+void setnonblocking(int fd){
+    fcntl(fd, F_SETFL, fcntl(fd, F_GETFL) | O_NONBLOCK);
+}
+
 Server::Server(){
     int sockfd=socket(AF_INET,SOCK_STREAM,0);
 
@@ -50,6 +57,7 @@ Server::Server(){
     }
     close(clin_sockfd);
     */
+    setnonblocking(sockfd);
     int epfd=epoll_create1(0);
     struct epoll_event ep_events[MAX_EVENTS];
     struct epoll_event epev;//只初始化一次，以后新客户端连接可以复用
@@ -68,6 +76,7 @@ Server::Server(){
                 errif(cl_sockfd==-1, "connect error!");
                 std::cout<<"a new client has connected"<<std::endl;
 
+                setnonblocking(cl_sockfd);
                 bzero(&epev, sizeof(epev));
                 epev.data.fd=cl_sockfd;
                 epev.events=EPOLLIN;
