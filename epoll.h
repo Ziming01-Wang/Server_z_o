@@ -23,7 +23,7 @@ public:
     Epoll();
     ~Epoll();
 
-    void addfd(int fd);
+    void addfd(int fd , uint32_t m_event=EPOLLIN|EPOLLET);
     std::vector<epoll_event> poll(int timeout=-1);
 };
 

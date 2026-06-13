@@ -14,5 +14,6 @@
 class Server {
 public:
     Server();
+    void dosomething(int clfd);
 };
 #endif

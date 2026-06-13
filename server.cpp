@@ -21,6 +21,25 @@ void setnonblocking(int fd){
     fcntl(fd, F_SETFL, fcntl(fd, F_GETFL) | O_NONBLOCK);
 }
 
+void Server::dosomething(int clfd){
+    char buf[1024];
+    while(1){
+        bzero(&buf, sizeof(buf));
+        ssize_t bytes_read=read(clfd,&buf,sizeof(buf));
+        if(bytes_read>0){
+            std::cout<<"[client:"<<clfd<<"]has written something:"<<buf<<std::endl;
+            write(clfd, buf, bytes_read);//回写给客户端，否则客户端的 read 会一直阻塞等待回复
+        }else if(bytes_read==-1&&errno==EINTR){//客户端正常中断
+            continue;
+        }else if(bytes_read==-1&&(errno==EAGAIN||errno==EWOULDBLOCK)){//读完了
+            break;
+        }else if(bytes_read==0){//EOF
+            close(clfd);
+            break;
+        }
+    }
+}
+
 Server::Server(){
     /*int sockfd=socket(AF_INET,SOCK_STREAM,0);
 
@@ -48,7 +67,7 @@ Server::Server(){
     epev.data.fd=sockfd;
     epoll_ctl(epfd, EPOLL_CTL_ADD, sockfd, &epev);//添加服务端监听套接字*/
     Epoll m_ep;
-    m_ep.addfd(server_socket.getfd());
+    m_ep.addfd(server_socket.getfd(),EPOLLIN);
 
     while(1){
         //int nfds=epoll_wait(epfd, ep_events, MAX_EVENTS, -1);
@@ -69,32 +88,18 @@ Server::Server(){
                 epoll_ctl(epfd, EPOLL_CTL_ADD, cl_sockfd, &epev);*/
                 int clfd=server_socket.accept();
                 std::cout<<"a new client has connected"<<std::endl;
+                setnonblocking(clfd);//accept 返回的 fd 默认是阻塞的，EPOLLET 必须配合非阻塞，否则 while 循环里第二次 read 会卡死
                 m_ep.addfd(clfd);
 
 
-            }else if(ep_events[i].events&EPOLLIN){
-                char buf[1024];
-                while(1){
-                    bzero(&buf, sizeof(buf));
-                    ssize_t bytes_read=read(ep_events[i].data.fd,&buf,sizeof(buf));
-                    if(bytes_read>0){
-                        std::cout<<"[client:"<<ep_events[i].data.fd<<"]has written something:"<<buf<<std::endl;
-                    }else if(bytes_read==-1&&errno==EINTR){//客户端正常中断
-                        continue;
-                    }else if(bytes_read==-1&&(errno==EAGAIN||errno==EWOULDBLOCK)){//读完了
-                        break;
-                    }else if(bytes_read==0){//EOF
-                        close(ep_events[i].data.fd);
-                        break;
-                    }
-                }
+            }else if(it.events&EPOLLIN){
+                dosomething(it.data.fd);
             }else{
                 printf("something else coming son....");
             }
         }
 
     }
-    close(sockfd);
 }
 
 int main(){

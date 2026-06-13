@@ -23,8 +23,7 @@ Client::Client(){
         char buf[1024];//buffer
         bzero(&buf,sizeof(buf));
 
-        //std::cin>>buf;
-        if(!std::cin.getline(buf, sizeof(buf))){//输入结束(EOF/Ctrl+D)，退出循环，避免空数据死循环
+        if(scanf("%s",buf)==EOF){//输入结束(EOF/Ctrl+D)，退出循环，避免空数据死循环
             std::cout<<"input closed, bye"<<std::endl;
             break;
         }

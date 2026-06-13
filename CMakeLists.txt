@@ -5,10 +5,12 @@ project(SingleThread_CS CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(SOURCES1 server.cpp util.cpp)
-set(SOURCES2 client.cpp util.cpp)
+set(SOURCES1 server.cpp util.cpp socket.cpp inetaddress.cpp epoll.cpp)
+set(SOURCES2 client.cpp util.cpp socket.cpp inetaddress.cpp)
+
+set(HEADERS server.h client.h socket.h inetaddress.h epoll.h util.h)
 # 编译服务端可执行文件
-add_executable(game_server ${SOURCES1})
+add_executable(game_server ${SOURCES1} ${HEADERS})
 
 # 编译客户端可执行文件
-add_executable(game_client ${SOURCES2})
+add_executable(game_client ${SOURCES2} ${HEADERS})

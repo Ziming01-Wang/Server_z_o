@@ -16,9 +16,9 @@ Epoll::~Epoll(){
     delete[] ep_events;
 }
 
-void Epoll::addfd(int fd){
+void Epoll::addfd(int fd ,uint32_t m_event){
     struct epoll_event epev;
-    epev.events=EPOLLIN|EPOLLET;
+    epev.events=m_event;
     epev.data.fd=fd;
     epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &epev);
 
