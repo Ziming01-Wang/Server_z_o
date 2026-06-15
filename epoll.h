@@ -15,6 +15,7 @@
 #include <mutex>
 #include <condition_variable>
 
+class Channel;
 class Epoll{
     int epfd=-1;
     struct epoll_event *ep_events;
@@ -24,7 +25,8 @@ public:
     ~Epoll();
 
     void addfd(int fd , uint32_t m_event=EPOLLIN|EPOLLET);
-    std::vector<epoll_event> poll(int timeout=-1);
+    std::vector<Channel*> poll(int timeout=-1);
+    void updateChannel(Channel *m_channel);
 };
 
 #endif
