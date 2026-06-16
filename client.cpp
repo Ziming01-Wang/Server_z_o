@@ -1,7 +1,4 @@
-#include "client.h"
-#include "socket.h"
-#include "inetaddress.h"
-#include "util.h"
+#include "src/client.h"
 #include <sys/socket.h>
 Client::Client(){
 

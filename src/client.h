@@ -1,19 +1,17 @@
-#ifndef SERVER_H
-#define SERVER_H
+#ifndef CLIENT_H
+#define CLIENT_H
 #include <iostream>
 #include<arpa/inet.h>
 #include <netinet/in.h>
-#include <ostream>
 #include <strings.h>
 #include<sys/socket.h>
 #include <string.h>
-#include "util.h"
 #include <unistd.h>
-#include <sys/epoll.h>
-
-class Server {
+#include "util.h"
+#include "socket.h"
+#include "inetaddress.h"
+class Client{
 public:
-    Server();
-    void dosomething(int clfd);
+    Client();
 };
 #endif

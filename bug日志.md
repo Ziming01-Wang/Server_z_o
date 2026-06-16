@@ -17,3 +17,5 @@ void *ptr（最常用，工业级网络库的选择）
 6.epoll_event_data的fd和ptr引用的是同一块内存，用哪个方式读就会转换为那个方式的类型；
 
 7.epoll *ev指针里边的update会改变内核给events的ptr，对应的，ev的poll读取events的ptr的时候，相应的强转为channel ※类型
+
+8。channel类作用是让每一个channel绑定总体的epoll类指针，channel的某些操作可以修改ep的update
