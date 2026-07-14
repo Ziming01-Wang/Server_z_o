@@ -1,4 +1,5 @@
 #include "src/server.h"
+#include "src/acceptor.h"
 #include "src/eventloop.h"
 #include "src/socket.h"
 
@@ -39,45 +40,15 @@ void Server::dosomething(int clfd){
 
 Server::Server(Eventloop *eventl):m_loop(eventl){
 
-    server_sock=new Socket();//用 new 让监听套接字活到 Server 析构，且只此一份，避免拷贝/提前 close
-    Inetaddress server_addr("127.0.0.1",8888);
-    server_sock->bind(server_addr);
-    server_sock->listen();
-    server_sock->setnonblocking();
-
-    Channel *servch=new Channel(m_loop,server_sock->getfd());
-    auto connectMask=std::bind(&Server::newconnect,this,server_sock);//传指针而非拷贝 Socket
-    servch->setcallback(connectMask);
-    servch->enableReading();
-    //m_ep.addfd(server_socket.getfd(),EPOLLIN);
-
-    /*while(1){
-        std::vector<Channel*> onchannels=m_ep->poll();
-        for(auto it:onchannels){
-            if(it->getfd()==server_socket.getfd()){
-        
-                int clfd=server_socket.accept();
-                std::cout<<"a new client has connected"<<std::endl;
-                setnonblocking(clfd);//accept 返回的 fd 默认是阻塞的，EPOLLET 必须配合非阻塞，否则 while 循环里第二次 read 会卡死
-                
-                //m_ep.addfd(clfd);
-                Channel *temcl=new Channel(m_ep,clfd);
-                temcl->enableReading();
-
-
-            }else if(it->getEvents()&EPOLLIN){
-                dosomething(it->getfd());
-            }else{
-                printf("something else coming son....");
-            }
-        }
-
-    }*/
-
+    m_acc=new Acceptor(m_loop);
+    std::function<void (Socket*)> cb=std::bind(&Server::newconnect,this,std::placeholders::_1);
+    m_acc->setcallback(cb);
+    
 }
 Server::~Server(){
-    delete server_sock;
+
     m_loop=nullptr;
+    delete m_acc;
 }
 
 

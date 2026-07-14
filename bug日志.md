@@ -19,3 +19,14 @@ void *ptr（最常用，工业级网络库的选择）
 7.epoll *ev指针里边的update会改变内核给events的ptr，对应的，ev的poll读取events的ptr的时候，相应的强转为channel ※类型
 
 8。channel类作用是让每一个channel绑定总体的epoll类指针，channel的某些操作可以修改ep的update
+
+8.1：eventloop是事件处理器：在main中创建，生命周期是整个程序
+
+8.2：acceptor是时间接收器，在server中创建，生命周期=server=main
+
+
+
+9.分离Acceptor:
+    1.std：：bind的函数如果不需要传参，则可以将参数设置为占位符：std：：placeholders：：——1
+    2.std：：function《A（B）》A是返回类型，B是参数列表
+

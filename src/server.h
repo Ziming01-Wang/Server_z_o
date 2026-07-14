@@ -6,6 +6,7 @@
 #include "socket.h"
 #include "util.h"
 #include "channel.h"
+#include "acceptor.h"
 
 
 #include <iostream>
@@ -20,8 +21,8 @@
 
 class Server {
     Eventloop *m_loop;
+    Acceptor *m_acc;
     //Epoll *m_ep;
-    Socket *server_sock;//监听套接字提升为成员，避免局部对象析构时提前 close 掉监听 fd
 public:
 
     Server(Eventloop *eventl);
