@@ -1,5 +1,6 @@
 #include "src/server.h"
 #include "src/acceptor.h"
+#include "src/connection.h"
 #include "src/eventloop.h"
 #include "src/socket.h"
 
@@ -57,9 +58,23 @@ void Server::newconnect(Socket *server_socket){
     std::cout<<"a new client has connected"<<std::endl;
     setnonblocking(clfd);//accept 返回的 fd 默认是阻塞的，EPOLLET 必须配合非阻塞，否则 while 循环里第二次 read 会卡死
                 
-    //m_ep.addfd(clfd);
-    Channel *temcl=new Channel(m_loop,clfd);
-    auto handlereadmask=std::bind(&Server::dosomething,this,clfd);
-    temcl->setcallback(handlereadmask);
-    temcl->enableReading();
+    //Channel *temcl=new Channel(m_loop,clfd);
+    //auto handlereadmask=std::bind(&Server::dosomething,this,clfd);
+    //temcl->setcallback(handlereadmask);
+    //temcl->enableReading();
+
+    Connection *newconn=new Connection(m_loop,clfd);
+    m_connections.emplace(clfd,newconn);
+    std::function<void(Socket*)> cb=std::bind(&Server::disconnect,this,std::placeholders::_1);
+    newconn->setDisconnectCallback(cb);
+
+}
+
+void Server::disconnect(Socket *clsock){
+    auto it=m_connections.find(clsock->getfd());
+    if(it!=m_connections.end()){
+        m_connections.erase(clsock->getfd());
+        delete it->second;
+    }
+    
 }

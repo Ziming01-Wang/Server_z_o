@@ -17,6 +17,7 @@ set(COMMON_SRC
     src/epoll.cpp
     src/eventloop.cpp
     src/acceptor.cpp
+    src/connection.cpp
 )
 
 # 编译服务端可执行文件（servermain.cpp 里有 main）
