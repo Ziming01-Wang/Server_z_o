@@ -18,6 +18,7 @@ set(COMMON_SRC
     src/eventloop.cpp
     src/acceptor.cpp
     src/connection.cpp
+    src/buffer.cpp
 )
 
 # 编译服务端可执行文件（servermain.cpp 里有 main）
