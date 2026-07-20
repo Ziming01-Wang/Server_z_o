@@ -29,7 +29,7 @@ void Connection::dosomething_echo(int clfd){
         if(bytes_read>0){
 
             std::cout<<"[client:"<<clfd<<"]has written something:"<<buf<<std::endl;
-            m_buffer.append(buf, sizeof(buf));
+            m_buffer.append(buf, bytes_read);
         }else if(bytes_read==-1&&errno==EINTR){//客户端正常中断
 
             std::cout<<"continue reading"<<std::endl;
