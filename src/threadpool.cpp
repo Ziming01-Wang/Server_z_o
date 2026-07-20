@@ -2,7 +2,6 @@
 #include <functional>
 #include <linux/falloc.h>
 #include <mutex>
-#include <stdexcept>
 #include <thread>
 Threadpool::Threadpool(int size){
     stop=false;
@@ -36,11 +35,3 @@ Threadpool::~Threadpool(){
         if (t.joinable()) t.join();
 }
 
-void Threadpool::add_task(std::function<void()> task){
-    {   
-        std::unique_lock<std::mutex>lock(task_mutex);
-        if(stop)throw std::runtime_error("ThreadPool already stop, can't add task any more");
-        queue_tasks.emplace(task);
-    }
-    cv.notify_one();
-}

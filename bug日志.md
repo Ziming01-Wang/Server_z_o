@@ -30,3 +30,22 @@ void *ptr（最常用，工业级网络库的选择）
     1.std：：bind的函数如果不需要传参，则可以将参数设置为占位符：std：：placeholders：：——1
     2.std：：function《A（B）》A是返回类型，B是参数列表
 
+10.线程池：
+    bool的stop标志修改也需要上锁
+    ~threadpool需要点join
+    条件变量的wait后边是判断继续的标志
+    Bug 2 到底错在哪
+{
+channel.cpp
+Lines 52-55
+void Channel::handleEvent(){
+    //callback();
+    loop->addthread(callback);   // 把回调丢给线程池
+}
+配合 EPOLLET，有两个致命点：
+
+同一连接被并发执行：主线程投递任务后立刻回到 epoll_wait。同一个 fd 只要再来数据就会再次触发，于是同一个 Connection::dosomething_echo 可能同时在两个 worker 上跑 → 两个线程同时 read/write 同一 fd、同时改 m_buffer。
+use-after-free：EOF 分支里 disconnectCallback → delete Connection。若同 fd 两个事件在两个 worker，一个已经 delete 了 Connection，另一个还在用 this/m_buffer → 崩溃。
+根因：每个连接的读写、以及 accept、epoll_ctl，本应在主线程串行做；线程池只适合放「与连接状态无关的纯计算」。Echo 是纯 IO，本不该进线程池。}
+
+11.线程池优化：
