@@ -42,3 +42,4 @@ void Socket::setnonblocking(){
 void Socket::connect(Inetaddress &A){
     errif(::connect(fd, (sockaddr*)&A.addr, A.addrlen)==-1,"connect error");
 }
+

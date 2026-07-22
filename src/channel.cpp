@@ -21,6 +21,11 @@ void Channel::enableReading(){
     loop->updatechannel(this);
 }
 
+void Channel::enableReadinglt(){
+    events = EPOLLIN ;
+    loop->updatechannel(this);
+}
+
 int Channel::getfd(){
     return fd;
 }
@@ -50,6 +55,9 @@ void Channel::setcallback(std::function<void()>m_call){
 }
 
 void Channel::handleEvent(){
-    //callback();
-    loop->addthread(callback);
+    if(usethreadpool==false) callback();
+    else loop->addthread(callback);
+}
+void Channel::nouseThreadpool(){
+    this->usethreadpool=false;
 }

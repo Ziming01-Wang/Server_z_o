@@ -14,8 +14,10 @@ private:
     uint32_t revents;
     bool inEpoll;
     std::function<void()> callback;
+    bool usethreadpool=true;
 public:
     void enableReading();
+    void enableReadinglt();
     Channel(Eventloop *loop, int fd);
     ~Channel();
     int getfd();
@@ -27,5 +29,6 @@ public:
     void setRevents(uint32_t m_ev);
     void setcallback(std::function<void()> m_call);
     void handleEvent();
+    void nouseThreadpool();
 };
 #endif

@@ -11,13 +11,13 @@ Acceptor::Acceptor(Eventloop *loop){
     m_addr=new Inetaddress("127.0.0.1",8888);
     m_socket->bind(*m_addr);
     m_socket->listen();
-    m_socket->setnonblocking();
+//    m_socket->setnonblocking();
 
     m_channel=new Channel(loop,m_socket->getfd());
     auto acclink=std::bind(&Acceptor::acceptConnection,this);
     m_channel->setcallback(acclink);
-    m_channel->enableReading();
-
+    m_channel->enableReadinglt();
+    m_channel->nouseThreadpool();
 }
 
 Acceptor::~Acceptor(){
